@@ -1,4 +1,4 @@
-USE agregacao ;
+USE academia ;
 
 -- 1. Listar todas as categorias cadastradas.
 -- Selecione todos os atributos da tabela `categorias`.
@@ -35,9 +35,10 @@ SELECT ROUND(AVG(preco_venda),2) AS media_venda FROM tabela_produtos  ;
 
 -- 8. Agrupar os produtos por categoria e exibir o maior preço de venda em cada grupo.
 -- Selecione o maior valor da coluna `preco_venda` na tabela `produtos`, agrupando os resultados por `id_categoria`.
-SELECT tabela_produtos.descricao, MAX(preco_venda) FROM tabela_produtos
-    GROUP BY tabela_produtos.id_categorias ;
-
+SELECT categorias.nome, MAX(tabela_produtos.preco_venda) 
+	FROM tabela_produtos
+    INNER JOIN categorias ON tabela_produtos.id_categorias = categorias.id
+    GROUP BY categorias.nome ;
 
 -- 9. Exibir as categorias onde o maior preço de venda dos produtos seja maior que 10 reais.
 -- Selecione os `id_categoria` onde o maior valor da coluna `preco_venda` seja maior que 10, agrupando os resultados.
@@ -81,3 +82,40 @@ SELECT COUNT(tabela_produtos.id), categorias.nome FROM tabela_produtos, categori
 SELECT categorias.nome, SUM(preco_venda) AS total_venda FROM tabela_produtos, categorias
 WHERE tabela_produtos.id_categorias = categorias.id
 GROUP BY categorias.nome ;
+
+-- 16 EXIBIR O PRECO MEDIO DE VENDA DOS PRODUTOS EM CADA CATEGORIA 
+
+SELECT categorias.nome, ROUND(AVG(preco_venda),2) AS Media_venda FROM categorias
+	 JOIN tabela_produtos ON tabela_produtos.id_categorias = categorias.id
+     GROUP BY categorias.id;
+
+-- 17. Listar as categorias que possuem produtos com preço de custo superior a 20 reais
+-- Selecione as categorias cujos produtos têm o valor da coluna `preco_custo` superior a 20 reais.
+SELECT categorias.nome, preco_custo FROM tabela_produtos
+	INNER JOIN categorias ON tabela_produtos.id_categorias = categorias.id
+    WHERE preco_custo > 20 ;
+    
+-- 18. Exibir o número total de produtos e a soma dos preços de custo para cada categoria
+-- Selecione a quantidade de produtos e a soma dos valores da coluna `preco_custo`, agrupando pelos nomes das categorias.
+SELECT categorias.nome, COUNT(tabela_produtos.id) AS total_produtos, SUM(tabela_produtos.preco_custo) AS total_custo 
+	FROM tabela_produtos
+    LEFT JOIN categorias ON tabela_produtos.id_categorias = categorias.id
+    GROUP BY categorias.nome ;
+
+-- 19. Exibir o produto mais caro de cada categoria junto com seu preço de custo
+-- Selecione o produto com o maior valor de `preco_venda` em cada categoria e exiba também o valor de `preco_custo`.
+SELECT categorias.nome, MAX(tabela_produtos.preco_venda) AS mais_caro,
+	(SELECT MAX(tabela_produtos.preco_custo) FROM tabela_produtos
+    WHERE tabela_produtos.id_categorias = categorias.id) AS maior_preco_custo
+	FROM tabela_produtos
+	JOIN categorias ON tabela_produtos.id_categorias = categorias.id
+    GROUP BY categorias.id, categorias.nome 
+     ORDER BY mais_caro DESC;
+
+
+-- 20. Exibir o preço de venda dos produtos com o menor preço de custo para cada categoria
+-- Selecione o menor valor da coluna `preco_custo` em cada categoria e exiba o preço de venda correspondente.
+SELECT categorias.nome, MIN(preco_custo) AS menor_preco FROM tabela_produtos
+	JOIN categorias ON tabela_produtos.id_categorias = categorias.id
+    GROUP BY categorias.nome 
+    ORDER BY tabela_produtos.preco_custo;
