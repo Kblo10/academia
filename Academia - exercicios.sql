@@ -91,9 +91,12 @@ SELECT categorias.nome, ROUND(AVG(preco_venda),2) AS Media_venda FROM categorias
 
 -- 17. Listar as categorias que possuem produtos com preço de custo superior a 20 reais
 -- Selecione as categorias cujos produtos têm o valor da coluna `preco_custo` superior a 20 reais.
-SELECT categorias.nome, preco_custo FROM tabela_produtos
-	INNER JOIN categorias ON tabela_produtos.id_categorias = categorias.id
-    WHERE preco_custo > 20 ;
+    
+SELECT categorias.nome FROM categorias 
+INNER JOIN tabela_produtos ON categorias.id = tabela_produtos.id_categorias
+GROUP BY categorias.id
+HAVING MIN(tabela_produtos.preco_custo) > 20;
+
     
 -- 18. Exibir o número total de produtos e a soma dos preços de custo para cada categoria
 -- Selecione a quantidade de produtos e a soma dos valores da coluna `preco_custo`, agrupando pelos nomes das categorias.
@@ -115,7 +118,10 @@ SELECT categorias.nome, MAX(tabela_produtos.preco_venda) AS mais_caro,
 
 -- 20. Exibir o preço de venda dos produtos com o menor preço de custo para cada categoria
 -- Selecione o menor valor da coluna `preco_custo` em cada categoria e exiba o preço de venda correspondente.
-SELECT categorias.nome, MIN(preco_custo) AS menor_preco FROM tabela_produtos
+SELECT categorias.nome, MIN(tabela_produtos.preco_venda) AS mais_caro,
+	(SELECT MIN(tabela_produtos.preco_custo) FROM tabela_produtos
+    WHERE tabela_produtos.id_categorias = categorias.id) AS maior_preco_custo
+	FROM tabela_produtos
 	JOIN categorias ON tabela_produtos.id_categorias = categorias.id
-    GROUP BY categorias.nome 
-    ORDER BY tabela_produtos.preco_custo;
+    GROUP BY categorias.id, categorias.nome 
+     ORDER BY mais_caro;
